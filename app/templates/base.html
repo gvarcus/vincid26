@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}Sistema de Incidencias{% endblock %}</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/odoo-theme.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar-odoo">
+        <div class="container">
+            <span class="navbar-brand"> Sistema de Incidencias</span>
+            {% if session.get('username') %}
+            <div class="navbar-text">
+                <span class="user-name"> {{ session.get('employee_data', {}).get('name', session.get('username')) }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-light">Cerrar Sesión</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Contenedor principal -->
+    <div class="page-container">
+        <div class="container">
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} fade-in" role="alert">
+                            <strong>
+                                {% if category == 'success' %}
+                                {% elif category == 'danger' or category == 'error' %}
+                                {% elif category == 'warning' %}
+                                {% elif category == 'info' %}ℹ
+                                {% endif %}
+                            </strong>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Contenido -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Sistema de Incidencias. Integración Odoo 16 Community.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Cerrar automáticamente los alerts después de 5 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.3s ease-out';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

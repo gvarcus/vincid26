@@ -1,0 +1,282 @@
+
+                  SISTEMA DE INCIDENCIAS - PRIMEROS PASOS                 
+                      Integración con Odoo 16 Community                    
+
+
+ RESUMEN DEL PROYECTO
+
+
+Sistema web para crear y enviar incidencias desde una aplicación external 
+integrada con Odoo 16 Community. Los usuarios se autentican con sus 
+credenciales de Odoo y sus datos se cargan automáticamente.
+
+ CARACTERÍSTICAS PRINCIPALES
+
+
+   Autenticación contra Odoo 16 (res.users)
+   Datos de empleados desde hr.employee
+   Generación automática de tickets (INC-0001, INC-0002...)
+   Validación segura de archivos (máx 10MB)
+   Envío de notificaciones por email
+   Tema visual de Odoo 16 Community
+   Sesiones seguras y protección CSRF
+   Logging completo de eventos
+   Interfaz responsive (mobile-friendly)
+
+ INICIO RÁPIDO (5 MINUTOS)
+
+
+1. CREAR ENTORNO VIRTUAL
+   
+   Linux/macOS:
+   $ python3 -m venv venv
+   $ source venv/bin/activate
+   
+   Windows:
+   > python -m venv venv
+   > venv\Scripts\activate
+
+2. INSTALAR DEPENDENCIAS
+
+   $ pip install -r requirements.txt
+
+3. CONFIGURAR VARIABLES DE ENTORNO
+
+   $ cp .env.example .env
+   
+   Editar .env con tus datos:
+   - ODOO_URL=https://fexs.mx
+   - ODOO_DB=Productiva
+   - MAIL_* credenciales SMTP (Gmail, Office365, etc)
+   - NOTIFICATION_EMAIL=soporte.tecnico@varcus.com.mx
+
+4. EJECUTAR APLICACIÓN
+
+   $ python run.py
+   
+   Acceder a: http://127.0.0.1:5000
+
+5. PROBAR
+
+   → Ingresa credenciales de un usuario de Odoo
+   → Completa el formulario de incidencia
+   → Se genera un ticket automáticamente
+   → Se envía email a soporte.tecnico@varcus.com.mx
+
+ ESTRUCTURA DE ARCHIVOS
+
+
+app/
+ __init__.py              # Factory de Flask
+ config.py                # Configuración centralizada
+ odoo_client.py           # Cliente XML-RPC para Odoo
+ models.py                # BD SQLite de tickets
+ forms.py                 # Formularios (login, incidencias)
+ utils.py                 # Email y validación de archivos
+ routes/
+    auth.py              # Login/logout
+    incident.py          # Formulario de incidencias
+ static/
+    css/odoo-theme.css   # Tema Odoo 16
+    js/                  # JavaScript
+    uploads/             # Archivos temporales
+ templates/
+     base.html            # Template base
+     login.html           # Login
+     incident_form.html   # Formulario
+     success.html         # Confirmación
+     history.html         # Historial
+
+instance/                     # Datos
+ tickets.db               # BD SQLite con números de tickets
+logs/                         # Logs
+ app.log                  # Log de la aplicación
+requirements.txt             # Dependencias de Python
+run.py                       # Punto de entrada
+
+ DOCUMENTACIÓN
+
+
+  README.md           → Descripción general y instalación
+  QUICK_START.md      → Inicio rápido en 5 minutos
+  DEPLOYMENT.md       → Deploy en producción
+  TESTING.md          → Guía de testing manual y automatizado
+  VERIFY.md           → Checklist de verificación
+  install.sh          → Script de instalación automatizado
+
+ CREDENCIALES Y CONFIGURACIÓN
+
+
+Archivo .env - Variables a configurar:
+
+  FLASK_ENV=development              # development o production
+  SECRET_KEY=change-me               # Cambiar en producción
+  DEBUG=True                         # False en producción
+  
+  ODOO_URL=https://fexs.mx          # URL de Odoo 16
+  ODOO_DB=Productiva                # Base de datos de Odoo
+  
+  MAIL_SERVER=smtp.gmail.com        # Servidor SMTP
+  MAIL_PORT=587                     # Puerto SMTP
+  MAIL_USERNAME=tu-email@gmail.com  # Usuario SMTP
+  MAIL_PASSWORD=app-specific-pwd    # Contraseña de aplicación
+  
+  NOTIFICATION_EMAIL=soporte@...    # Email de destino
+
+Para Gmail:
+  1. Activa 2FA: https://myaccount.google.com/security
+  2. Genera contraseña de aplicación: https://myaccount.google.com/apppasswords
+  3. Usa esa contraseña en MAIL_PASSWORD (NO la contraseña normal)
+
+ CAMPOS DEL FORMULARIO
+
+
+El formulario tiene los siguientes campos:
+
+  1. Tipo de Incidente (select)
+     → Soporte técnico
+     → Recursos humanos
+     → Mantenimiento
+     → (Modificable en .env)
+
+  2. Título (texto, 5-200 caracteres)
+     → Descripción breve del problema
+
+  3. Descripción (texto largo, 10-2000 caracteres)
+     → Detalles específicos
+
+  4. Archivo Adjunto (opcional)
+     → Máximo 10MB
+     → Formatos: PDF, PNG, JPG, GIF, MP4, AVI, MOV, DOC, DOCX
+
+ DATOS DEL EMPLEADO (Cargados automáticamente)
+
+
+Del modelo hr.employee se obtienen:
+
+  • Nombre completo
+  • Departamento
+  • Puesto/Cargo
+  • Supervisor/Jefe directo
+  • Email de trabajo
+  • Teléfono de trabajo
+
+Todos estos datos se incluyen en el email de notificación.
+
+ FLUJO DE USUARIO
+
+
+1. Usuario accede a la URL
+   ↓
+2. Se muestra página de login
+   ↓
+3. Ingresa credenciales de Odoo
+   ↓
+4. Se autentica contra Odoo 16
+   ↓
+5. Se cargan datos del empleado
+   ↓
+6. Se muestra formulario con datos en cabecera
+   ↓
+7. Usuario completa formulario
+   ↓
+8. Se valida formulario (client-side y server-side)
+   ↓
+9. Se genera número de ticket (INC-0001, etc)
+   ↓
+10. Se envía email de notificación
+    ↓
+11. Se muestra página de confirmación con número de ticket
+
+ SEGURIDAD
+
+
+Medidas implementadas:
+
+   CSRF Protection (Flask-WTF)
+   XSS Prevention (Jinja2 auto-escaping)
+   SQL Injection Prevention (SQLAlchemy ORM)
+   Session Security (HTTPOnly, SameSite, timeout)
+   Rate Limiting (5 intentos/minuto en login)
+   File Validation (extensión, MIME type, tamaño)
+   Input Validation (WTForms validators)
+   Secure Headers (CSP, X-Frame-Options, etc)
+
+ SOLUCIÓN DE PROBLEMAS
+
+
+Error: "Connection refused" a Odoo
+  → Verificar que Odoo está accesible en https://fexs.mx
+  → Verificar credenciales de usuario Odoo
+
+Error: "SMTP connection failed"
+  → Verificar credenciales de email en .env
+  → Para Gmail: usar contraseña de aplicación (NO la normal)
+
+Error: "No tiene perfil de empleado"
+  → El usuario debe tener un registro en hr.employee
+  → Verificar relación usuario-empleado en Odoo
+
+Error: "Address already in use"
+  → Puerto 5000 está ocupado
+  → Usar otro puerto: python run.py 8000
+
+Error: "No module named 'app'"
+  → Activar entorno virtual:
+    $ source venv/bin/activate  (Linux/macOS)
+    $ venv\Scripts\activate     (Windows)
+
+ CAMBIOS COMUNES
+
+
+Agregar nuevos tipos de incidencias:
+  → Editar .env
+  → INCIDENT_TYPES=Soporte técnico,Recursos humanos,Mantenimiento,Nuevo
+
+Cambiar email de destino:
+  → Editar .env
+  → NOTIFICATION_EMAIL=nuevo-email@ejemplo.com
+
+Cambiar formato de ticket:
+  → Editar app/models.py
+  → Función generate_ticket_number()
+  → Cambiar: f"INC-{new_number:04d}"
+
+ PRODUCCIÓN
+
+
+Para desplegar en producción:
+
+  1. Ver DEPLOYMENT.md para opciones de:
+     - Linux/Ubuntu con Systemd
+     - Docker
+     - Heroku
+
+  2. Configurar variables de entorno de producción
+  3. Activar SSL/TLS (HTTPS)
+  4. Configurar Nginx o Apache como reverse proxy
+  5. Configurar backup automático de BD
+  6. Revisar logs regularmente
+
+ ¡LISTO PARA EMPEZAR!
+
+
+Próximo paso:
+
+  1. Editar .env con tus credenciales
+  2. Ejecutar: python run.py
+  3. Acceder a: http://127.0.0.1:5000
+  4. ¡Probar el sistema!
+
+Para más información:
+  → Ver README.md
+  → Ver QUICK_START.md
+  → Ver plan completo en .claude/plans/
+
+
+
+Fecha: Diciembre 2024
+Versión: 1.0.0
+Estado:  Completado y Listo para Usar
+
+

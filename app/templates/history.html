@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Incidencias - Sistema de Incidencias{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin: 0; font-size: 20px;"> Historial de Incidencias</h2>
+            </div>
+
+            <div class="card-body">
+                {% if tickets %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Número de Ticket</th>
+                                <th>Tipo</th>
+                                <th>Título</th>
+                                <th>Fecha de Creación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                            <tr>
+                                <td>
+                                    <span class="ticket-badge">{{ ticket.number }}</span>
+                                </td>
+                                <td>{{ ticket.type }}</td>
+                                <td>{{ ticket.title }}</td>
+                                <td>{{ ticket.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div style="text-align: center; padding: 40px; color: var(--odoo-text-muted);">
+                        <div style="font-size: 48px; margin-bottom: 20px;"></div>
+                        <p>No tienes incidencias registradas aún</p>
+                        <a href="{{ url_for('incident.form') }}" class="btn btn-primary mt-3">
+                             Crear Primera Incidencia
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                <a href="{{ url_for('incident.form') }}" class="btn btn-primary">
+                     Nueva Incidencia
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-light">
+                     Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

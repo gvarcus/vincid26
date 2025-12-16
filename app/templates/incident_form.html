@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Formulario de Incidencia - Sistema de Incidencias{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <!-- Información del Empleado -->
+        {% set employee = session.get('employee_data', {}) %}
+        {% if employee %}
+        <div class="employee-header">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <div>
+                    <span class="label">Nombre</span>
+                    <div class="value">{{ employee.get('name', 'Desconocido') }}</div>
+                </div>
+                <div>
+                    <span class="label">Departamento</span>
+                    <div class="value">{{ employee.get('department', 'N/A') }}</div>
+                </div>
+                <div>
+                    <span class="label">Puesto</span>
+                    <div class="value">{{ employee.get('job', 'N/A') }}</div>
+                </div>
+                <div>
+                    <span class="label">Email</span>
+                    <div class="value">{{ employee.get('work_email', 'N/A') }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 style="margin: 0; font-size: 20px;">Crear Nueva Incidencia</h2>
+            </div>
+
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <!-- Tipo de Incidencia -->
+                    <div class="form-group">
+                        {{ form.incident_type.label }}
+                        {% if form.incident_type.errors %}
+                            {{ form.incident_type(class="form-control is-invalid") }}
+                            <div class="invalid-feedback" style="display: block;">
+                                {% for error in form.incident_type.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.incident_type(class="form-control") }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Título -->
+                    <div class="form-group">
+                        {{ form.title.label }}
+                        {% if form.title.errors %}
+                            {{ form.title(class="form-control is-invalid") }}
+                            <div class="invalid-feedback" style="display: block;">
+                                {% for error in form.title.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.title(class="form-control") }}
+                        {% endif %}
+                        <div class="form-text">
+                            <span id="title-count">0</span> / 200 caracteres
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="form-group">
+                        {{ form.description.label }}
+                        {% if form.description.errors %}
+                            {{ form.description(class="form-control is-invalid") }}
+                            <div class="invalid-feedback" style="display: block;">
+                                {% for error in form.description.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.description(class="form-control") }}
+                        {% endif %}
+                        <div class="form-text">
+                            <span id="description-count">0</span> / 2000 caracteres
+                        </div>
+                    </div>
+
+                    <!-- Archivo Adjunto -->
+                    <div class="form-group">
+                        {{ form.file_upload.label }}
+                        {% if form.file_upload.errors %}
+                            {{ form.file_upload(class="form-control is-invalid") }}
+                            <div class="invalid-feedback" style="display: block;">
+                                {% for error in form.file_upload.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.file_upload(class="form-control") }}
+                        {% endif %}
+                        <div class="form-text required">
+                            * Tamaño máximo: 10 MB<br>
+                            * Formatos permitidos: PDF, PNG, JPG, GIF, MP4, AVI, MOV, DOC, DOCX<br>
+                            * Este campo es opcional
+                        </div>
+                        <div id="file-info" style="display: none; margin-top: 10px; padding: 10px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; color: #0c5460; font-size: 13px;">
+                             <span id="file-name"></span> (<span id="file-size"></span>)
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="form-group" style="margin-top: 30px; display: flex; gap: 10px; justify-content: space-between;">
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                 Enviar Incidencia
+                            </button>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-light">
+                                Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info adicional -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                ℹ Información Importante
+            </div>
+            <div class="card-body">
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>Tu número de ticket se generará automáticamente después del envío</li>
+                    <li>Se enviará una notificación al equipo de soporte con tu incidencia</li>
+                    <li>Todos tus datos personales se incluirán automáticamente en el reporte</li>
+                    <li>Intenta ser lo más específico posible en la descripción del problema</li>
+                    <li>Los archivos adjuntos pueden ayudar a resolver tu incidencia más rápidamente</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Contador de caracteres para título
+    const titleInput = document.querySelector('textarea[name="title"], input[name="title"]') || document.querySelector('[name="title"]');
+    if (titleInput) {
+        titleInput.addEventListener('input', function() {
+            document.getElementById('title-count').textContent = this.value.length;
+        });
+        document.getElementById('title-count').textContent = titleInput.value.length;
+    }
+
+    // Contador de caracteres para descripción
+    const descInput = document.querySelector('textarea[name="description"]');
+    if (descInput) {
+        descInput.addEventListener('input', function() {
+            document.getElementById('description-count').textContent = this.value.length;
+        });
+        document.getElementById('description-count').textContent = descInput.value.length;
+    }
+
+    // Información del archivo
+    const fileInput = document.querySelector('input[name="file_upload"]');
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            const fileInfo = document.getElementById('file-info');
+            if (this.files && this.files.length > 0) {
+                const file = this.files[0];
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('file-size').textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+</script>
+{% endblock %}
