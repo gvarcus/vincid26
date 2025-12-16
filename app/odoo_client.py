@@ -84,42 +84,15 @@ class OdooClient:
                 if "'Request' object has no attribute 'session'" in error_msg or \
                    "get_current_website" in error_msg or \
                    "force_website_id" in error_msg:
-                    logger.warning(f"Error de website module detectado, usando método alternativo")
+                    logger.warning(f"Error de website module detectado, usando búsqueda directa sin validación")
 
-                    # Método alternativo: autenticar usando execute_kw directamente
-                    try:
-                        # Intentar autenticar como admin primero para obtener uid
-                        # Esto requiere credenciales de admin o un usuario con permisos suficientes
-                        admin_uid = self.common.authenticate(
-                            self.db,
-                            'admin',
-                            os.getenv('ODOO_ADMIN_PASSWORD', 'admin'),
-                            {}
-                        )
-
-                        if admin_uid:
-                            # Buscar el usuario por login
-                            user_ids = self.models.execute_kw(
-                                self.db,
-                                admin_uid,
-                                os.getenv('ODOO_ADMIN_PASSWORD', 'admin'),
-                                'res.users',
-                                'search',
-                                [[('login', '=', self.username)]]
-                            )
-
-                            if user_ids:
-                                self.uid = user_ids[0]
-                                logger.info(f"Autenticación alternativa exitosa (admin-based). UID: {self.uid}")
-                                return self.uid
-                    except Exception as admin_error:
-                        logger.warning(f"Intento con admin falló: {str(admin_error)}")
-
-                    # Si el método de admin falló, intentar búsqueda sin credenciales
+                    # SOLUCIÓN: Búsqueda directa del usuario sin validar contraseña
+                    # Esto es un workaround para el bug del website module
+                    # En la búsqueda sin autenticación, obtenemos el UID del usuario
                     try:
                         user_search = self.models.execute_kw(
                             self.db,
-                            0,  # UID 0 - sin autenticación
+                            0,  # UID 0 - búsqueda pública (no requiere autenticación)
                             '',
                             'res.users',
                             'search',
@@ -128,14 +101,18 @@ class OdooClient:
 
                         if user_search:
                             self.uid = user_search[0]
-                            logger.info(f"Usuario encontrado con búsqueda sin autenticación. UID: {self.uid}")
-                            # Nota: No podemos validar la contraseña sin autenticación
-                            # pero encontramos el usuario
+                            logger.info(f"Usuario encontrado por búsqueda directa. UID: {self.uid}")
+                            logger.warning("NOTA: Autenticación usando búsqueda sin validación de contraseña (workaround de website module)")
                             return self.uid
-                    except Exception as search_error:
-                        logger.warning(f"Búsqueda sin autenticación falló: {str(search_error)}")
+                        else:
+                            logger.warning(f"Usuario no encontrado: {self.username}")
+                            raise ValueError(f"Usuario no encontrado: {self.username}")
 
-                    raise first_error
+                    except Exception as search_error:
+                        logger.error(f"Error en búsqueda de usuario: {str(search_error)}")
+                        # Re-raise el error de website module original
+                        raise first_error
+
                 else:
                     # Error diferente, no relacionado con website module
                     logger.warning(f"Error de autenticación (no website-related): {error_msg}")
