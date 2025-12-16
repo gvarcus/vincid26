@@ -23,4 +23,4 @@ RUN mkdir -p logs instance app/static/uploads
 EXPOSE 8000
 
 # Comando para ejecutar la aplicación
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "--timeout", "120", "run:app"]
+CMD ["gunicorn", "--config", "gunicorn_config.py", "run:app"]

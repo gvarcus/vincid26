@@ -2,6 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask
+from werkzeug.proxy_fix import ProxyFix
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
 from flask_session import Session
@@ -40,6 +41,17 @@ def create_app(config_name='development'):
 
     # Cargar configuración
     app.config.from_object(config[config_name])
+
+    # Configurar ProxyFix para trabajar detrás de proxies (EasyPanel, Nginx, etc)
+    if config_name == 'production':
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app,
+            x_for=1,
+            x_proto=1,
+            x_host=1,
+            x_port=1,
+            x_prefix=1
+        )
 
     # Inicializar extensiones
     csrf.init_app(app)
