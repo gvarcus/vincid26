@@ -15,10 +15,9 @@ from dotenv import load_dotenv
 # Cargar variables de entorno
 load_dotenv()
 
-# Determinar el ambiente
+# Determinar el ambiente (solo desde variable de entorno)
+# No procesar sys.argv para evitar conflictos con gunicorn
 env = os.getenv('FLASK_ENV', 'development')
-if len(sys.argv) > 1:
-    env = sys.argv[1]
 
 # Crear aplicación
 app = create_app(env)
