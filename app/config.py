@@ -22,7 +22,7 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@example.com')
 
     # Notification Configuration
-    NOTIFICATION_EMAIL = os.getenv('NOTIFICATION_EMAIL', 'soporte.tecnico@varcus.com.mx')
+    NOTIFICATION_EMAIL = os.getenv('NOTIFICATION_EMAIL', 'incidenciasvarcus@gmail.com')
 
     # Incident Types
     incident_types_env = os.getenv('INCIDENT_TYPES', 'Soporte técnico,Recursos humanos,Mantenimiento')
